@@ -131,6 +131,24 @@ export interface DiscussionSearchResponse {
   }>;
 }
 
+export interface IssueItem {
+  title: string;
+  number: number;
+  url: string;
+}
+
+export interface IssueSearchResponse {
+  data?: {
+    search: {
+      nodes: IssueItem[];
+    };
+  };
+  errors?: Array<{
+    message: string;
+    [key: string]: any;
+  }>;
+}
+
 export function getCommitMessage$({ token, repo, owner, ref }: GetCommitMessageProps): Observable<CommitNode | null> {
   const query = `
     query($owner: String!, $repo: String!, $ref: String!) {
@@ -279,6 +297,55 @@ export function searchDiscussions$(query: string): Observable<string[]> {
     }),
     catchError((error) => {
       console.error("GitHub discussion search error:", error);
+      throw error;
+    })
+  );
+}
+
+export function searchIssues$(query: string): Observable<string[]> {
+  const token = apiKeys$.value.github;
+  if (!token) {
+    throw new Error("GitHub token not found");
+  }
+
+  const fullQuery = `is:issue ${query}`;
+  const gqlQuery = `
+    query($query: String!) {
+      search(query: $query, type: ISSUE, first: 10) {
+        nodes {
+          ... on Issue {
+            title
+          }
+        }
+      }
+    }
+  `;
+
+  const variables = { query: fullQuery };
+
+  return fromFetch("https://api.github.com/graphql", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query: gqlQuery, variables }),
+  }).pipe(
+    mergeMap(async (response) => {
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`GraphQL HTTP Error: ${response.status} ${response.statusText}. Details: ${errorText.substring(0, 200)}`);
+      }
+      return await response.json();
+    }),
+    map((data: IssueSearchResponse) => {
+      if (data.errors) {
+        throw new Error(`GraphQL Error: ${data.errors.map((e) => e.message).join(", ")}`);
+      }
+      return (data.data?.search.nodes || []).map((node) => node.title);
+    }),
+    catchError((error) => {
+      console.error("GitHub issue search error:", error);
       throw error;
     })
   );
