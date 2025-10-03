@@ -3,6 +3,11 @@ import { catchError, map, mergeMap } from "rxjs";
 import { fromFetch } from "rxjs/fetch";
 import { apiKeys$ } from "../connections/storage";
 
+// TODO: use blame api to find the line that has the keyword and get the message
+// TODO: directly search commit title/messages, avoid source code
+// TODO: search for PR instead of commit
+// TODO: mix in issues to make it sound more natural
+
 export interface SearchItem {
   name: string;
   path: string;
