@@ -29,7 +29,6 @@ export const CrowdComponent = createComponent(() => {
 
   keydownInterrupt$.subscribe(() => {
     speechQueue.clear();
-    audioPlayer.clearQueued();
   });
 
   escapeKeydown$.subscribe(() => {
