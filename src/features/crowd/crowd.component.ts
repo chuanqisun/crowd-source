@@ -6,7 +6,7 @@ import { escapeKeydown$, idle$, line$ } from "../editor/editor.component";
 import { searchDiscussions$, searchIssues$, searchPullRequests$ } from "./search";
 import { generateAudioBlob, playAudioBlob } from "./tts";
 
-export const SearchDebuggerComponent = createComponent(() => {
+export const CrowdComponent = createComponent(() => {
   const handleSearch = () => {
     console.log({ line: line$.value, apiKey: apiKeys$.value.github });
 
