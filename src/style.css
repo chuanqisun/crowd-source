@@ -3,3 +3,23 @@
   line-height: 1.5;
   font-weight: 400;
 }
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+#app {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+main {
+  overflow: auto;
+}
+
+.cm-editor {
+  height: 100%;
+}
