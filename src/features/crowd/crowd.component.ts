@@ -27,9 +27,14 @@ export const CrowdComponent = createComponent(() => {
     )
     .subscribe();
 
-  merge(keydownInterrupt$, escapeKeydown$).subscribe(() => {
+  keydownInterrupt$.subscribe(() => {
     speechQueue.clear();
     audioPlayer.clearQueued();
+  });
+
+  escapeKeydown$.subscribe(() => {
+    speechQueue.clear();
+    audioPlayer.clear();
   });
 
   idle$
