@@ -56,17 +56,25 @@ export class AudioPlayer {
     }
   }
 
-  clear(): void {
+  clearPlaying(): void {
     for (const subscription of this.playing) {
       subscription.unsubscribe();
     }
     this.playing.clear();
     this.activeItems = [];
+  }
+
+  clearQueued(): void {
     // Reject all pending promises in the queue
     for (const item of this.queue) {
       item.reject(new Error("Audio player cleared"));
     }
     this.queue = [];
+  }
+
+  clear(): void {
+    this.clearPlaying();
+    this.clearQueued();
   }
 }
 

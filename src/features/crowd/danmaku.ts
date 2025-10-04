@@ -16,7 +16,7 @@ export function useDanmaku() {
       text,
       style: {
         fontSize: "48px",
-        color: ["white", "yellow", "red", "green", "blue", "purple"][Math.floor(Math.random() * 6)],
+        color: ["white", "yellow", "red", "lime", "cyan", "magenta"][Math.floor(Math.random() * 6)],
         textShadow: "-1px -1px #000, -1px 1px #000, 1px -1px #000, 1px 1px #000",
       },
     });

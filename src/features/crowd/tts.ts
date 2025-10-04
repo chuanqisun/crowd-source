@@ -45,7 +45,7 @@ export function generateAudioBlob(text: string): Observable<PlayableSpeech> {
         if (err.name === "AbortError") {
           subscriber.complete();
         } else {
-          subscriber.error(err);
+          subscriber.next({ text: err.message || "Error generating speech", blob: new Blob() });
         }
       });
 

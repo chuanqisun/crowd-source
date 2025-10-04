@@ -22,14 +22,14 @@ export const CrowdComponent = createComponent(() => {
       distinctUntilChanged(),
       debounceTime(lineChangeDebounce),
       tap(() => speechQueue.clear()),
-      switchMap((line) => searchAll$(line).pipe(take(30), mergeMap(generateAudioBlob, 3), takeUntil(escapeKeydown$))),
+      switchMap((line) => searchAll$(line).pipe(take(20), mergeMap(generateAudioBlob, 2), takeUntil(escapeKeydown$))),
       tap((playable) => speechQueue.enqueue(playable))
     )
     .subscribe();
 
   merge(keydownInterrupt$, escapeKeydown$).subscribe(() => {
     speechQueue.clear();
-    audioPlayer.clear();
+    audioPlayer.clearQueued();
   });
 
   idle$
@@ -44,7 +44,7 @@ export const CrowdComponent = createComponent(() => {
                 await audioPlayer.play(playable.text, playAudioBlob(playable.blob));
               } catch (e) {}
             }
-          }, 3)
+          }, 2)
         )
       )
     )
