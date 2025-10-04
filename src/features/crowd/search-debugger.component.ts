@@ -2,7 +2,7 @@ import { html } from "lit-html";
 import { distinct, from, map, merge, mergeMap } from "rxjs";
 import { createComponent } from "../../sdk/create-component";
 import { apiKeys$ } from "../connections/storage";
-import { line$ } from "../editor/editor.component";
+import { escapeKeydown$, idle$, line$ } from "../editor/editor.component";
 import { searchDiscussions$, searchIssues$, searchPullRequests$ } from "./search";
 import { generateAudioBlob, playAudioBlob } from "./tts";
 
@@ -31,6 +31,10 @@ export const SearchDebuggerComponent = createComponent(() => {
 
     uniqueStream.subscribe({ error: (error) => console.error("Error:", error) });
   };
+
+  escapeKeydown$.subscribe(() => {});
+
+  idle$.subscribe(() => {});
 
   return html` <button @click=${handleSearch}>Search</button> `;
 });
