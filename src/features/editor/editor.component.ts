@@ -1,12 +1,9 @@
 import { EditorView, keymap } from "@codemirror/view";
 import { basicSetup } from "codemirror";
 import { BehaviorSubject, merge } from "rxjs";
-import { debounceTime } from "rxjs/operators";
+import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 
 export const line$ = new BehaviorSubject<string>("");
-
-/* emit when user types anything */
-export const typingInterrupt$ = new BehaviorSubject<void>(undefined);
 
 /* emit when user presses escape */
 export const escapeKeydown$ = new BehaviorSubject<void>(undefined);
@@ -24,7 +21,6 @@ export function useEditor() {
         if (!update.changes.empty) {
           const line = update.state.doc.lineAt(update.state.selection.main.head).text;
           line$.next(line);
-          typingInterrupt$.next();
         }
       }),
       keymap.of([
@@ -39,6 +35,6 @@ export function useEditor() {
     ],
   });
 
-  const idleSource$ = merge(typingInterrupt$, escapeKeydown$).pipe(debounceTime(1000));
+  const idleSource$ = merge(line$.pipe(distinctUntilChanged()), escapeKeydown$).pipe(debounceTime(1000));
   idleSource$.subscribe(() => idle$.next());
 }

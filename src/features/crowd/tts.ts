@@ -33,7 +33,6 @@ export function generateAudioBlob(text: string): Observable<Blob> {
       )
       .then(async (mp3) => {
         if (abortController.signal.aborted) return;
-
         const audioBlob = new Blob([await mp3.arrayBuffer()], { type: "audio/mpeg" });
         subscriber.next(audioBlob);
         subscriber.complete();

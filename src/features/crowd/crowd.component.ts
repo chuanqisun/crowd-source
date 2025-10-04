@@ -1,40 +1,33 @@
 import { html } from "lit-html";
-import { distinct, from, map, merge, mergeMap } from "rxjs";
+import { mergeMap } from "rxjs";
+import { debounceTime, distinctUntilChanged, filter, switchMap, take, tap } from "rxjs/operators";
 import { createComponent } from "../../sdk/create-component";
-import { apiKeys$ } from "../connections/storage";
 import { escapeKeydown$, idle$, line$ } from "../editor/editor.component";
-import { searchDiscussions$, searchIssues$, searchPullRequests$ } from "./search";
-import { generateAudioBlob, playAudioBlob } from "./tts";
+import { searchAll$ } from "./search";
+import { speechQueue } from "./speech-queue";
+import { generateAudioBlob } from "./tts";
 
 export const CrowdComponent = createComponent(() => {
-  const handleSearch = () => {
-    console.log({ line: line$.value, apiKey: apiKeys$.value.github });
+  speechQueue.queueLength$.pipe(distinctUntilChanged()).subscribe((length) => {
+    console.log("Speech queue length:", length);
+  });
 
-    const issues$ = searchIssues$(line$.value).pipe(
-      map((results) => [...new Set(results)]),
-      mergeMap((items) => from(items))
-    );
-    const prs$ = searchPullRequests$(line$.value).pipe(
-      map((results) => [...new Set(results)]),
-      mergeMap((items) => from(items))
-    );
-    const disucssions = searchDiscussions$(line$.value).pipe(
-      map((results) => [...new Set(results)]),
-      mergeMap((items) => from(items))
-    );
-
-    const uniqueStream = merge(issues$, prs$, disucssions).pipe(
-      distinct(),
-      mergeMap((item) => generateAudioBlob(item), 3),
-      mergeMap((blob) => playAudioBlob(blob), 2)
-    );
-
-    uniqueStream.subscribe({ error: (error) => console.error("Error:", error) });
-  };
+  // Subscribe to line changes, debounce, generate voice, enqueue
+  line$
+    .pipe(
+      tap(() => speechQueue.clear()),
+      filter((line) => line.trim().length > 3),
+      distinctUntilChanged(),
+      debounceTime(300),
+      tap(() => speechQueue.clear()),
+      switchMap((line) => searchAll$(line).pipe(take(20), mergeMap(generateAudioBlob, 3))),
+      tap((blob) => speechQueue.enqueue(blob))
+    )
+    .subscribe();
 
   escapeKeydown$.subscribe(() => {});
 
   idle$.subscribe(() => {});
 
-  return html` <button @click=${handleSearch}>Search</button> `;
+  return html``;
 });

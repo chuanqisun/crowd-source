@@ -1,5 +1,5 @@
 import type { Observable } from "rxjs";
-import { catchError, map, mergeMap } from "rxjs";
+import { catchError, distinct, from, map, merge, mergeMap } from "rxjs";
 import { fromFetch } from "rxjs/fetch";
 import { apiKeys$ } from "../connections/storage";
 
@@ -349,4 +349,23 @@ export function searchIssues$(query: string): Observable<string[]> {
       throw error;
     })
   );
+}
+
+export function searchAll$(query: string): Observable<string> {
+  const issues$ = searchIssues$(query).pipe(
+    map((results) => [...new Set(results)]),
+    mergeMap((items) => from(items))
+  );
+  const prs$ = searchPullRequests$(query).pipe(
+    map((results) => [...new Set(results)]),
+    mergeMap((items) => from(items))
+  );
+  const discussions$ = searchDiscussions$(query).pipe(
+    map((results) => [...new Set(results)]),
+    mergeMap((items) => from(items))
+  );
+
+  const uniqueStream = merge(issues$, prs$, discussions$).pipe(distinct());
+
+  return uniqueStream;
 }
