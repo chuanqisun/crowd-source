@@ -1,9 +1,12 @@
+import { javascript } from "@codemirror/lang-javascript";
+import { oneDark } from "@codemirror/theme-one-dark";
 import { EditorView, keymap } from "@codemirror/view";
 import { basicSetup } from "codemirror";
 import { BehaviorSubject, merge, Subject } from "rxjs";
 import { debounceTime, distinctUntilChanged, skip } from "rxjs/operators";
+import initialDoc from "./quick-sort.ts?raw";
 
-export const lineChangeDebounce = 300;
+export const lineChangeDebounce = 200;
 export const idleDebounce = 1000;
 
 export const line$ = new BehaviorSubject<string>("");
@@ -19,9 +22,11 @@ export const idle$ = new BehaviorSubject<void>(undefined);
 export function useEditor() {
   new EditorView({
     parent: document.getElementById("editor-root")!,
-    doc: "",
+    doc: initialDoc,
     extensions: [
       basicSetup,
+      javascript({ typescript: true, jsx: true }),
+      oneDark,
       EditorView.updateListener.of((update) => {
         if (!update.changes.empty) {
           const line = update.state.doc.lineAt(update.state.selection.main.head).text;

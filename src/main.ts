@@ -8,7 +8,7 @@ import "./style.css";
 const App = createComponent(() => {
   return html`
     <header>
-      Crowd Source <button commandfor="connection-dialog" command="show-modal">Setup</button>
+      <button commandfor="connection-dialog" command="show-modal">Setup</button>
       ${CrowdComponent()}
     </header>
     <main id="editor-root"></main>

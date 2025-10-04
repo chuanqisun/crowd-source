@@ -2,6 +2,7 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  color-scheme: dark;
 }
 
 html,
@@ -13,7 +14,13 @@ body {
 #app {
   height: 100%;
   display: grid;
-  grid-template-rows: auto 1fr;
+}
+
+header {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  z-index: 999;
 }
 
 main {
