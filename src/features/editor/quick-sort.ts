@@ -1,3 +1,5 @@
+// Start typing to hear from those who wrote the same code
+
 function quickSort(arr: number[], low: number = 0, high: number = arr.length - 1): void {
   if (low < high) {
     const pivotIndex = partition(arr, low, high);
