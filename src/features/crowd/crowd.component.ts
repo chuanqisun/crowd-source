@@ -43,7 +43,7 @@ export const CrowdComponent = createComponent(() => {
                 await audioPlayer.play(blob);
               } catch (e) {}
             }
-          }, 2)
+          }, 1)
         )
       )
     )
