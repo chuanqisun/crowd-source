@@ -4,6 +4,7 @@ import { createComponent } from "../../sdk/create-component";
 import { apiKeys$ } from "../connections/storage";
 import { line$ } from "../editor/editor.component";
 import { searchDiscussions$, searchIssues$, searchPullRequests$ } from "./search";
+import { generateAudioBlob, playAudioBlob } from "./tts";
 
 export const SearchDebuggerComponent = createComponent(() => {
   const handleSearch = () => {
@@ -22,40 +23,13 @@ export const SearchDebuggerComponent = createComponent(() => {
       mergeMap((items) => from(items))
     );
 
-    const uniqueStream = merge(issues$, prs$, disucssions).pipe(distinct());
+    const uniqueStream = merge(issues$, prs$, disucssions).pipe(
+      distinct(),
+      mergeMap((item) => generateAudioBlob(item), 3),
+      mergeMap((blob) => playAudioBlob(blob), 2)
+    );
 
-    uniqueStream.subscribe({
-      next: (item) => {
-        console.log("Search result item:", item);
-      },
-      error: (error) => {
-        console.error("Error:", error);
-      },
-    });
-
-    // search$(line$.value)
-    //   .pipe(
-    //     mergeMap((result) => {
-    //       console.log("Search results:", result);
-    //       return result.items;
-    //     }),
-    //     mergeMap((item) => {
-    //       return getCommitMessage$({
-    //         token: apiKeys$.value.github!,
-    //         repo: item.repository.name,
-    //         owner: item.repository.owner.login,
-    //         ref: new URL(item.url).searchParams.get("ref")!,
-    //       });
-    //     }, 3)
-    //   )
-    //   .subscribe({
-    //     next: (message) => {
-    //       console.log("Commit message suggestion:", message?.message);
-    //     },
-    //     error: (error) => {
-    //       console.error("Error:", error);
-    //     },
-    //   });
+    uniqueStream.subscribe({ error: (error) => console.error("Error:", error) });
   };
 
   return html` <button @click=${handleSearch}>Search</button> `;
