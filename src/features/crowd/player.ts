@@ -1,11 +1,11 @@
-import { BehaviorSubject, type Observable } from "rxjs";
+import { Subject, type Observable } from "rxjs";
 
 export class AudioPlayer {
   private maxConcurrent: number;
   private playing: Set<any> = new Set(); // subscriptions
   private queue: Array<{ text: string; observable: Observable<void>; resolve: () => void; reject: (error: any) => void }> = [];
   private activeItems: Array<{ text: string; subscription: any }> = [];
-  public activeText$ = new BehaviorSubject<string[]>([]);
+  public activeText$ = new Subject<string>();
 
   constructor(maxConcurrent: number = 3) {
     this.maxConcurrent = maxConcurrent;
@@ -39,14 +39,13 @@ export class AudioPlayer {
     });
     this.playing.add(subscription);
     this.activeItems.push({ text, subscription });
-    this.activeText$.next(this.activeItems.map((item) => item.text));
+    this.activeText$.next(text);
   }
 
   private removeActiveItem(subscription: any): void {
     const index = this.activeItems.findIndex((item) => item.subscription === subscription);
     if (index >= 0) {
       this.activeItems.splice(index, 1);
-      this.activeText$.next(this.activeItems.map((item) => item.text));
     }
   }
 
@@ -63,7 +62,6 @@ export class AudioPlayer {
     }
     this.playing.clear();
     this.activeItems = [];
-    this.activeText$.next([]);
     // Reject all pending promises in the queue
     for (const item of this.queue) {
       item.reject(new Error("Audio player cleared"));

@@ -1,6 +1,7 @@
 import { html, render } from "lit-html";
 import { ConnectionsComponent } from "./features/connections/connections.component";
 import { CrowdComponent } from "./features/crowd/crowd.component";
+import { useDanmaku } from "./features/crowd/danmaku";
 import { useEditor } from "./features/editor/editor.component";
 import { createComponent } from "./sdk/create-component";
 import "./style.css";
@@ -26,3 +27,5 @@ const App = createComponent(() => {
 render(App(), document.getElementById("app")!);
 
 useEditor();
+
+useDanmaku();

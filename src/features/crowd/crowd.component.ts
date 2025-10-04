@@ -3,6 +3,7 @@ import { interval, merge, mergeMap } from "rxjs";
 import { debounceTime, distinctUntilChanged, filter, switchMap, take, takeUntil, tap } from "rxjs/operators";
 import { createComponent } from "../../sdk/create-component";
 import { escapeKeydown$, idle$, keydownInterrupt$, line$, lineChangeDebounce } from "../editor/editor.component";
+import { showDanmaku } from "./danmaku";
 import { audioPlayer } from "./player";
 import { searchAll$ } from "./search";
 import { speechQueue } from "./speech-queue";
@@ -21,7 +22,7 @@ export const CrowdComponent = createComponent(() => {
       distinctUntilChanged(),
       debounceTime(lineChangeDebounce),
       tap(() => speechQueue.clear()),
-      switchMap((line) => searchAll$(line).pipe(take(20), mergeMap(generateAudioBlob, 3), takeUntil(escapeKeydown$))),
+      switchMap((line) => searchAll$(line).pipe(take(30), mergeMap(generateAudioBlob, 3), takeUntil(escapeKeydown$))),
       tap((playable) => speechQueue.enqueue(playable))
     )
     .subscribe();
@@ -43,14 +44,14 @@ export const CrowdComponent = createComponent(() => {
                 await audioPlayer.play(playable.text, playAudioBlob(playable.blob));
               } catch (e) {}
             }
-          }, 2)
+          }, 3)
         )
       )
     )
     .subscribe(() => {});
 
-  audioPlayer.activeText$.subscribe((texts) => {
-    console.log("Currently playing:", texts);
+  audioPlayer.activeText$.subscribe((text) => {
+    showDanmaku(text);
   });
 
   return html``;
