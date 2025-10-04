@@ -1,12 +1,17 @@
 import { EditorView, keymap } from "@codemirror/view";
 import { basicSetup } from "codemirror";
-import { BehaviorSubject, merge } from "rxjs";
-import { debounceTime, distinctUntilChanged } from "rxjs/operators";
+import { BehaviorSubject, merge, Subject } from "rxjs";
+import { debounceTime, distinctUntilChanged, skip } from "rxjs/operators";
+
+export const lineChangeDebounce = 300;
+export const idleDebounce = 1000;
 
 export const line$ = new BehaviorSubject<string>("");
 
+export const keydownInterrupt$ = line$.pipe(skip(1));
+
 /* emit when user presses escape */
-export const escapeKeydown$ = new BehaviorSubject<void>(undefined);
+export const escapeKeydown$ = new Subject<void>();
 
 /* emit when user idles for 1 second: no typing at all, no escape keydown */
 export const idle$ = new BehaviorSubject<void>(undefined);
@@ -35,6 +40,6 @@ export function useEditor() {
     ],
   });
 
-  const idleSource$ = merge(line$.pipe(distinctUntilChanged()), escapeKeydown$).pipe(debounceTime(1000));
+  const idleSource$ = merge(line$.pipe(distinctUntilChanged()), escapeKeydown$).pipe(debounceTime(idleDebounce));
   idleSource$.subscribe(() => idle$.next());
 }
