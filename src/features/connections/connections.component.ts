@@ -80,12 +80,6 @@ export const ConnectionsComponent = createComponent(() => {
     clearTestResults("openai");
   };
 
-  const handleGeminiChange = (e: Event) => {
-    const input = e.target as HTMLInputElement;
-    apiKeyChange$.next({ provider: "gemini", value: input.value });
-    clearTestResults("gemini");
-  };
-
   const handleGitHubChange = (e: Event) => {
     const input = e.target as HTMLInputElement;
     apiKeyChange$.next({ provider: "github", value: input.value });
@@ -133,28 +127,6 @@ export const ConnectionsComponent = createComponent(() => {
                   if (loading.openai) return `Testing...`;
                   if (errors.openai) return `✗ ${errors.openai}`;
                   if (results.openai) return `✓ ${results.openai}`;
-                  return "✓ Set";
-                })
-              )
-            )
-          )
-        )
-      )
-    )
-  );
-
-  const geminiStatus$ = testLoading$.pipe(
-    mergeMap((loading) =>
-      testResults$.pipe(
-        mergeMap((results) =>
-          testErrors$.pipe(
-            mergeMap((errors) =>
-              apiKeys$.pipe(
-                map((apiKeys) => {
-                  if (!apiKeys.gemini) return "✗ Not set";
-                  if (loading.gemini) return "Testing...";
-                  if (errors.gemini) return `✗ ${errors.gemini}`;
-                  if (results.gemini) return `✓ ${results.gemini}`;
                   return "✓ Set";
                 })
               )
