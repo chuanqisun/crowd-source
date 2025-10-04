@@ -7,7 +7,7 @@ import { debounceTime, distinctUntilChanged, skip } from "rxjs/operators";
 import initialDoc from "./quick-sort.ts?raw";
 
 export const lineChangeDebounce = 200;
-export const idleDebounce = 1000;
+export const idleDebounce = 500;
 
 export const line$ = new BehaviorSubject<string>("");
 
@@ -28,10 +28,8 @@ export function useEditor() {
       javascript({ typescript: true, jsx: true }),
       oneDark,
       EditorView.updateListener.of((update) => {
-        if (!update.changes.empty) {
-          const line = update.state.doc.lineAt(update.state.selection.main.head).text;
-          line$.next(line);
-        }
+        const line = update.state.doc.lineAt(update.state.selection.main.head).text;
+        line$.next(line);
       }),
       keymap.of([
         {
@@ -45,6 +43,6 @@ export function useEditor() {
     ],
   });
 
-  const idleSource$ = merge(line$.pipe(distinctUntilChanged()), escapeKeydown$).pipe(debounceTime(idleDebounce));
+  const idleSource$ = merge(line$.pipe(distinctUntilChanged()), escapeKeydown$).pipe(debounceTime(idleDebounce), skip(1));
   idleSource$.subscribe(() => idle$.next());
 }

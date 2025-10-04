@@ -17,18 +17,16 @@ export const CrowdComponent = createComponent(() => {
   // Subscribe to line changes, debounce, generate voice, enqueue
   line$
     .pipe(
-      tap(() => speechQueue.clear()),
       filter((line) => line.trim().length > 3),
       distinctUntilChanged(),
       debounceTime(lineChangeDebounce),
-      tap(() => speechQueue.clear()),
-      switchMap((line) => searchAll$(line).pipe(take(20), mergeMap(generateAudioBlob, 2), takeUntil(escapeKeydown$))),
+      switchMap((line) => searchAll$(line).pipe(take(10), mergeMap(generateAudioBlob, 3), takeUntil(escapeKeydown$))),
       tap((playable) => speechQueue.enqueue(playable))
     )
     .subscribe();
 
   keydownInterrupt$.subscribe(() => {
-    speechQueue.clear();
+    // speechQueue.clear();
   });
 
   escapeKeydown$.subscribe(() => {
@@ -48,7 +46,7 @@ export const CrowdComponent = createComponent(() => {
                 await audioPlayer.play(playable.text, playAudioBlob(playable.blob));
               } catch (e) {}
             }
-          }, 2)
+          }, 3)
         )
       )
     )
