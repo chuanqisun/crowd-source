@@ -189,7 +189,6 @@ export const ConnectionsComponent = createComponent(() => {
 
   // 4. Combine state and template
   const openaiApiKey$ = apiKeys$.pipe(map((keys) => keys.openai || ""));
-  const geminiApiKey$ = apiKeys$.pipe(map((keys) => keys.gemini || ""));
   const githubApiKey$ = apiKeys$.pipe(map((keys) => keys.github || ""));
 
   const template = html`
@@ -198,10 +197,7 @@ export const ConnectionsComponent = createComponent(() => {
         <label for="openai-key">OpenAI API Key</label>
         <input id="openai-key" type="password" value=${observe(openaiApiKey$)} placeholder="sk-..." @input=${handleOpenAIChange} />
       </div>
-      <div class="form-field">
-        <label for="gemini-key">Gemini API Key</label>
-        <input id="gemini-key" type="password" value=${observe(geminiApiKey$)} placeholder="API key for Google Gemini" @input=${handleGeminiChange} />
-      </div>
+
       <div class="form-field">
         <label for="github-key">GitHub API Key</label>
         <input id="github-key" type="password" value=${observe(githubApiKey$)} placeholder="ghp_..." @input=${handleGitHubChange} />
@@ -211,7 +207,6 @@ export const ConnectionsComponent = createComponent(() => {
 
       <div class="form-status">
         <small>OpenAI: ${observe(openaiStatus$)}</small><br />
-        <small>Gemini: ${observe(geminiStatus$)}</small><br />
         <small>GitHub: ${observe(githubStatus$)}</small>
       </div>
     </form>
