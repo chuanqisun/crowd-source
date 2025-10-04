@@ -1,28 +1,29 @@
 import { BehaviorSubject } from "rxjs";
+import type { PlayableSpeech } from "./tts";
 
 /**
- * Simple queue for managing audio blobs
- * Users can enqueue blobs and dequeue them for playback
+ * Simple queue for managing playable speech items
+ * Users can enqueue items and dequeue them for playback
  */
 export class SpeechQueue {
-  private queue: Blob[] = [];
+  private queue: PlayableSpeech[] = [];
   private _queueLength$ = new BehaviorSubject<number>(0);
 
   /**
-   * Add a blob to the queue
+   * Add a playable speech item to the queue
    */
-  enqueue(blob: Blob): void {
-    this.queue.push(blob);
+  enqueue(item: PlayableSpeech): void {
+    this.queue.push(item);
     this._queueLength$.next(this.queue.length);
   }
 
   /**
-   * Get the next blob from the queue, or null if empty
+   * Get the next playable speech item from the queue, or null if empty
    */
-  dequeue(): Blob | null {
-    const blob = this.queue.shift() || null;
+  dequeue(): PlayableSpeech | null {
+    const item = this.queue.shift() || null;
     this._queueLength$.next(this.queue.length);
-    return blob;
+    return item;
   }
 
   /**

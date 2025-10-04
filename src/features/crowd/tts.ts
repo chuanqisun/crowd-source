@@ -1,10 +1,14 @@
 import OpenAI from "openai";
 import type { Observable } from "rxjs";
-import { Observable as RxObservable, mergeMap } from "rxjs";
+import { Observable as RxObservable, map, mergeMap } from "rxjs";
 import { apiKeys$ } from "../connections/storage";
 
-export function generateAudioBlob(text: string): Observable<Blob> {
-  return new RxObservable<Blob>((subscriber) => {
+export interface PlayableSpeech {
+  text: string;
+  blob: Blob;
+}
+export function generateAudioBlob(text: string): Observable<PlayableSpeech> {
+  return new RxObservable<PlayableSpeech>((subscriber) => {
     const openAIKey = apiKeys$.value.openai;
     if (!openAIKey) {
       subscriber.error(new Error("OpenAI API key not set"));
@@ -34,7 +38,7 @@ export function generateAudioBlob(text: string): Observable<Blob> {
       .then(async (mp3) => {
         if (abortController.signal.aborted) return;
         const audioBlob = new Blob([await mp3.arrayBuffer()], { type: "audio/mpeg" });
-        subscriber.next(audioBlob);
+        subscriber.next({ text, blob: audioBlob });
         subscriber.complete();
       })
       .catch((err) => {
@@ -90,6 +94,6 @@ export function playAudioBlob(blob: Blob): Observable<void> {
   });
 }
 
-export function generateSpeech(text: string): Observable<void> {
-  return generateAudioBlob(text).pipe(mergeMap(playAudioBlob));
+export function generateSpeech(text: string): Observable<PlayableSpeech> {
+  return generateAudioBlob(text).pipe(mergeMap((playable) => playAudioBlob(playable.blob).pipe(map(() => playable))));
 }

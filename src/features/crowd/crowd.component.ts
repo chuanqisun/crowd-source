@@ -6,7 +6,7 @@ import { escapeKeydown$, idle$, keydownInterrupt$, line$, lineChangeDebounce } f
 import { audioPlayer } from "./player";
 import { searchAll$ } from "./search";
 import { speechQueue } from "./speech-queue";
-import { generateAudioBlob } from "./tts";
+import { generateAudioBlob, playAudioBlob } from "./tts";
 
 export const CrowdComponent = createComponent(() => {
   speechQueue.queueLength$.pipe(distinctUntilChanged()).subscribe((length) => {
@@ -22,7 +22,7 @@ export const CrowdComponent = createComponent(() => {
       debounceTime(lineChangeDebounce),
       tap(() => speechQueue.clear()),
       switchMap((line) => searchAll$(line).pipe(take(20), mergeMap(generateAudioBlob, 3), takeUntil(escapeKeydown$))),
-      tap((blob) => speechQueue.enqueue(blob))
+      tap((playable) => speechQueue.enqueue(playable))
     )
     .subscribe();
 
@@ -37,17 +37,21 @@ export const CrowdComponent = createComponent(() => {
         interval(500).pipe(
           takeUntil(merge(keydownInterrupt$, escapeKeydown$)),
           mergeMap(async () => {
-            const blob = speechQueue.dequeue();
-            if (blob) {
+            const playable = speechQueue.dequeue();
+            if (playable) {
               try {
-                await audioPlayer.play(blob);
+                await audioPlayer.play(playable.text, playAudioBlob(playable.blob));
               } catch (e) {}
             }
-          }, 1)
+          }, 2)
         )
       )
     )
     .subscribe(() => {});
+
+  audioPlayer.activeText$.subscribe((texts) => {
+    console.log("Currently playing:", texts);
+  });
 
   return html``;
 });
